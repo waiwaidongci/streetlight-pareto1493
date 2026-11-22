@@ -50,3 +50,22 @@ class Delivery(Base):
     state: Mapped[str] = mapped_column(String(20))
     detail: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(default=now)
+
+class ReportRelease(Base):
+    """街道报修表的一次成功发布：按数据批次累计披露状态，并保证幂等重试。"""
+    __tablename__ = 'report_releases'
+    __table_args__ = (UniqueConstraint('dataset_id', 'idempotency_key'),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    dataset_id: Mapped[int] = mapped_column(ForeignKey('datasets.id'), index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(80))
+    start_date: Mapped[str | None] = mapped_column(String(10))
+    end_date: Mapped[str | None] = mapped_column(String(10))
+    metrics: Mapped[list] = mapped_column(JSON)
+    # 本次发布后累计固定的 cell 与小计，作为后续下载的硬约束。
+    published_cells: Mapped[dict] = mapped_column(JSON)
+    published_margins: Mapped[list] = mapped_column(JSON)
+    report: Mapped[dict] = mapped_column(JSON)
+    export_file: Mapped[str | None] = mapped_column(String(100))
+    author: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(default=now)

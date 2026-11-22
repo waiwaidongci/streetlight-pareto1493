@@ -28,3 +28,10 @@ class ScheduleRequest(RunRequest):
     recipient: str = Field(min_length=1, max_length=100)
     first_at: datetime
     repeat_daily: bool = False
+
+class ReportDownloadRequest(Request):
+    dataset_id: int = Field(gt=0)
+    start_date: str | None = None
+    end_date: str | None = None
+    metrics: list[str] = Field(min_length=1, max_length=3)
+    idempotency_key: str = Field(min_length=1, max_length=80)
